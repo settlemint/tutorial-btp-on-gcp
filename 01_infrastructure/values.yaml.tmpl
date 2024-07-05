@@ -52,11 +52,6 @@ vault:
   secretId: "${secret_id}"
 
 features:
-  observability:
-    metrics:
-      enabled: true
-    logs:
-      enabled: true
   deploymentEngine:
     platform:
       domain:
@@ -129,7 +124,37 @@ docs:
   replicaCount: 2
 
 observability:
+  metrics-server:
+    enabled: false
+  kube-state-metrics:
+    enabled: true
+  victoria-metrics-single:
+    enabled: true
+    # default settlemint/settlemint
+    # generate with htpasswd -nb <username> <grafana_password>, put the result in the value below
+    basicAuth: "settlemint:$apr1$e0pGqiLq$NLXe1AB34fGs6/1u0.PR4."
+    server:
+      ingress:
+        enabled: true
+        hosts:
+          - name: "metrics.${gcp_dns_zone}"
+            path: /
+            port: http
+  alloy:
+    enabled: true
+    endpoints:
+      external:
+        prometheus:
+          enabled: false
+          url: ""
+        loki:
+          enabled: false
+          url: ""
+        otel:
+          enabled: false
+          url: ""
   grafana:
+    enabled: true
     auth:
       username: settlemint
       password: ${grafana_password}
@@ -141,3 +166,21 @@ observability:
     grafana.ini:
       server:
         root_url: https://grafana.${gcp_dns_zone}
+  tempo:
+    enabled: true
+  loki:
+    enabled: true
+     # default settlemint/settlemint
+    # generate with htpasswd -nb <username> <grafana_password>, put the result in the value below
+    basicAuth: "settlemint:$apr1$e0pGqiLq$NLXe1AB34fGs6/1u0.PR4."
+    gateway:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution: null
+      ingress:
+        enabled: true
+        hosts:
+          - host: "logs.${gcp_dns_zone}"
+            paths:
+              - path: /
+                pathType: Prefix
