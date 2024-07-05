@@ -1,0 +1,143 @@
+ingress:
+  enabled: true
+  className: nginx
+  host: "${gcp_dns_zone}"
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/proxy-ssl-server-name: "on"
+    nginx.ingress.kubernetes.io/proxy-body-size: "500m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    external-dns.alpha.kubernetes.io/hostname: "${gcp_dns_zone}, *.${gcp_dns_zone}"
+
+external-dns:
+  enabled: true
+  txtOwnerId: "${gcp_dns_zone}-settlemint"
+  policy: "sync"
+  serviceAccount:
+    create: false
+    name: ${external_dns_workload_identity}
+  sources:
+    - service
+  extraArgs:
+    - --annotation-filter=external-dns.alpha.kubernetes.io/hostname
+  provider:
+    name: google
+  google:
+    project: ${gcp_project_id}
+
+redis:
+  host: redis-master.${dependencies_namespace}.svc.cluster.local
+  password: "${redis_password}"
+
+postgresql:
+  host: postgresql.${dependencies_namespace}.svc.cluster.local
+  user: "${gcp_platform_name}"
+  password: "${postgresql_password}"
+  database: "${gcp_platform_name}"
+
+auth:
+  jwtSigningKey: "${jwtSigningKey}"
+  providers:
+    google:
+      enabled: true
+      clientID: "${gcp_client_id}"
+      clientSecret: "${gcp_client_secret}"
+
+vault:
+  enabled: true
+  address: http://vault.${dependencies_namespace}.svc.cluster.local:8200
+  roleId: "${role_id}"
+  secretId: "${secret_id}"
+
+features:
+  observability:
+    metrics:
+      enabled: true
+    logs:
+      enabled: true
+  deploymentEngine:
+    platform:
+      domain:
+        hostname: "${gcp_dns_zone}"
+    clusterManager:
+      domain:
+        hostname: "${gcp_dns_zone}"
+    state:
+      s3ConnectionUrl: "s3://${gcp_platform_name}?region=${gcp_region}&endpoint=minio.${dependencies_namespace}.svc.cluster.local:9000&disableSSL=true&s3ForcePathStyle=true"
+      credentials:
+        encryptionKey: "${encryption_key}"
+        aws:
+          accessKeyId: "${minio_svcacct_access_key}"
+          secretAccessKey: "${minio_svcacct_secret_key}"
+          region: "${gcp_region}"
+    targets:
+      - id: gke
+        name: "Google Cloud"
+        icon: google
+        clusters:
+          - id: trial
+            name: "Trial Demo"
+            icon: belgium
+            location:
+              lat: 50.8505
+              lon: 4.3488
+            connection:
+              sameCluster:
+                enabled: true
+            namespace:
+              single:
+                name: "${deployment_namespace}"
+            domains:
+              service:
+                tls: true
+                hostname: "${gcp_dns_zone}"
+            storage:
+              storageClass: "standard-rwo"
+            ingress:
+              ingressClass: "settlemint-nginx"
+            capabilities:
+              mixedLoadBalancers: false
+
+app:
+  replicaCount: 2
+
+api:
+  replicaCount: 2
+
+job:
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "512Mi"
+  autoscaling:
+    enabled: true
+
+deployWorker:
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "512Mi"
+  autoscaling:
+    enabled: true
+
+clusterManager:
+  replicaCount: 2
+
+docs:
+  replicaCount: 2
+
+observability:
+  grafana:
+    auth:
+      username: settlemint
+      password: ${grafana_password}
+    ingress:
+      enabled: true
+      ingressClassName: settlemint-nginx
+      hosts:
+        - grafana.${gcp_dns_zone}
+    grafana.ini:
+      server:
+        root_url: https://grafana.${gcp_dns_zone}
