@@ -1,3 +1,27 @@
+module "service_accounts" {
+  source        = "terraform-google-modules/service-accounts/google"
+  version       = "~> 4.0"
+  project_id    = var.gcp_project_id
+  prefix        = "vault"
+  names         = ["unseal-sa"]
+  project_roles = [
+    "${var.gcp_project_id}=>roles/cloudkms.cryptoKeyEncrypterDecrypter",
+    "${var.gcp_project_id}=>roles/cloudkms.viewer",
+  ]
+  generate_keys = true
+}
+
+resource "kubernetes_config_map" "vault_gcp_sa" {
+  metadata {
+    name      = var.vault_gcp_sa
+    namespace = var.dependencies_namespace
+  }
+
+  data = {
+    "credentials.json" = module.service_accounts.keys["unseal-sa"]
+  }
+}
+
 resource "helm_release" "vault" {
   name             = "vault"
   repository       = "https://helm.releases.hashicorp.com"
@@ -12,16 +36,6 @@ resource "helm_release" "vault" {
   }
 
   set {
-    name  = "server.serviceAccount.create"
-    value = "false"
-  }
-
-  set {
-    name  = "server.serviceAccount.name"
-    value = var.vault_unseal_workload_identity
-  }
-
-  set {
     name  = "server.extraEnvironmentVars.GOOGLE_REGION"
     value = "${var.gcp_region}"
   }
@@ -29,6 +43,31 @@ resource "helm_release" "vault" {
   set {
     name  = "server.extraEnvironmentVars.GOOGLE_PROJECT"
     value = var.gcp_project_id
+  }
+
+  set {
+    name  = "server.extraEnvironmentVars.GOOGLE_APPLICATION_CREDENTIALS"
+    value = "/vault/userconfig/vault-gcp-sa/credentials.json"
+  }
+
+  set {
+    name  = "server.volumes[0].name"
+    value = var.vault_gcp_sa
+  }
+
+  set {
+    name  = "server.volumes[0].configMap.name"
+    value = kubernetes_config_map.vault_gcp_sa.metadata[0].name
+  }
+
+  set {
+    name  = "server.volumeMounts[0].name"
+    value = var.vault_gcp_sa
+  }
+
+  set {
+    name  = "server.volumeMounts[0].mountPath"
+    value = "/vault/userconfig/${var.vault_gcp_sa}"
   }
 
   set {
@@ -58,15 +97,7 @@ resource "helm_release" "vault" {
     EOT
   }
 
-  depends_on = [module.gke, google_kms_crypto_key.vault_crypto_key, kubernetes_namespace.cluster_dependencies_namespace, google_kms_key_ring.vault_key_ring, module.vault_unseal_workload_identity]
-}
-
-resource "null_resource" "delay" {
-  provisioner "local-exec" {
-    command = "sleep 60"
-  }
-
-  depends_on = [helm_release.vault]
+  depends_on = [module.gke, google_kms_crypto_key.vault_crypto_key, kubernetes_namespace.cluster_dependencies_namespace, google_kms_key_ring.vault_key_ring]
 }
 
 resource "kubernetes_role" "vault_access" {
@@ -101,8 +132,6 @@ resource "kubernetes_role_binding" "vault_access_binding" {
   depends_on = [ helm_release.vault ]
 }
 
-
-
 resource "kubernetes_job" "vault_init" {
   metadata {
     name      = "vault-init"
@@ -126,15 +155,6 @@ while [ "$(kubectl get pod vault-0 -n ${var.dependencies_namespace} -o jsonpath=
   sleep 2
 done
 
-while true; do
-  if kubectl logs vault-0 -n ${var.dependencies_namespace} | grep -q "error parsing Seal configuration"; then
-    echo "Error parsing Seal configuration found, retrying in 5 seconds..."
-    sleep 5
-  else
-    echo "No error parsing Seal configuration found, proceeding..."
-    break
-  fi
-done
 
 if kubectl get configmap vault-init-output -n ${var.dependencies_namespace}; then
   kubectl delete configmap vault-init-output -n ${var.dependencies_namespace}
@@ -159,7 +179,7 @@ EOF
     }
     backoff_limit = 0
   }
-  depends_on = [helm_release.vault, google_kms_crypto_key.vault_crypto_key, module.vault_unseal_workload_identity, null_resource.delay]
+  depends_on = [helm_release.vault, google_kms_crypto_key.vault_crypto_key]
 }
 
 data "kubernetes_config_map" "vault_init_output" {

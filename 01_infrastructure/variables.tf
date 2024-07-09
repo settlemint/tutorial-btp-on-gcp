@@ -95,3 +95,9 @@ variable "gcp_crypto_key_name" {
   type        = string
   default     = "vault-key"
 }
+
+variable "vault_gcp_sa" {
+  description = "The name of the vault configmap with GCP service account key"
+  type        = string
+  default     = "vault-gcp-sa"
+}
