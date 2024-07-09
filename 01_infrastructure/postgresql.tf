@@ -32,5 +32,5 @@ resource "helm_release" "postgresql" {
     value = var.gcp_platform_name
   }
 
-  depends_on = [module.gke]
+  depends_on = [module.gke, kubernetes_namespace.cluster_dependencies_namespace]
 }

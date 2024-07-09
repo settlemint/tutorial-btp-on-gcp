@@ -97,5 +97,5 @@ resource "helm_release" "minio" {
     value = "if [[ ! $(mc admin user svcacct ls provisioning ${var.gcp_platform_name} | grep ${random_password.minio_svcacct_access_key.result}) ]]; then mc admin user svcacct add --access-key \"${random_password.minio_svcacct_access_key.result}\" --secret-key \"${random_password.minio_svcacct_secret_key.result}\" provisioning ${var.gcp_platform_name}; fi"
   }
 
-  depends_on = [module.gke]
+  depends_on = [module.gke, kubernetes_namespace.cluster_dependencies_namespace]
 }

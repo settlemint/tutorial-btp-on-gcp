@@ -46,5 +46,5 @@ resource "helm_release" "settlemint" {
 
   values = [local.values_yaml]
 
-  depends_on = [kubernetes_job.vault_unseal]
+  depends_on = [kubernetes_job.vault_configure]
 }

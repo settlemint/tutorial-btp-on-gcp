@@ -22,5 +22,5 @@ resource "helm_release" "redis" {
     value = random_password.redis_password.result
   }
 
-  depends_on = [module.gke]
+  depends_on = [module.gke, kubernetes_namespace.cluster_dependencies_namespace]
 }

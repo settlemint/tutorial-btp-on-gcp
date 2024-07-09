@@ -66,6 +66,12 @@ variable "external_dns_workload_identity" {
   default     = "external-dns"
 }
 
+variable "vault_unseal_workload_identity" {
+  type        = string
+  description = "Name of the vault unseal workload identity GCP service account"
+  default     = "vault-unseal"
+}
+
 variable "gcp_client_id" {
   type        = string
   description = "OAuth gcp client id"
@@ -76,4 +82,16 @@ variable "gcp_client_secret" {
   type        = string
   description = "OAuth gcp client secret"
   nullable    = false
+}
+
+variable "gcp_key_ring_name" {
+  description = "The name of the KMS key ring"
+  type        = string
+  default     = "vault-key-ring"
+}
+
+variable "gcp_crypto_key_name" {
+  description = "The name of the KMS crypto key"
+  type        = string
+  default     = "vault-key"
 }

@@ -21,7 +21,7 @@ resource "helm_release" "cert_manager" {
     value = "true"
   }
 
-  depends_on = [module.cert_manager_workload_identity]
+  depends_on = [module.cert_manager_workload_identity, kubernetes_namespace.cluster_dependencies_namespace]
 }
 
 
