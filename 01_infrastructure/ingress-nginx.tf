@@ -13,7 +13,7 @@ resource "helm_release" "nginx_ingress" {
 
   create_namespace = true
 
-  depends_on = [module.gke]
+  depends_on = [module.gke, kubernetes_namespace.cluster_dependencies_namespace]
 }
 
 data "kubernetes_service" "nginx_ingress" {
@@ -26,7 +26,7 @@ data "kubernetes_service" "nginx_ingress" {
 }
 
 data "google_dns_managed_zone" "dns_zone" {
-  name = var.gcp_platform_name
+  name    = var.gcp_platform_name
   project = var.gcp_project_id
 }
 

@@ -1,5 +1,8 @@
 # BTP on Goodle Cloud Platform
 
+## **For DEMO purposes only.**
+*This is not production ready solution. We run all components locally and not in HA mode. For production, we suggest running PostgreSQL, Redis, and Vault outside of the cluster.*
+
 This repository contains the code for the tutorial BTP on GCP.
 
 ## Prerequisites
@@ -27,6 +30,7 @@ gcloud auth application-default login
 You will need to enable several API for your project.
 
 - container.googleapis.com: https://console.developers.google.com/apis/api/container.googleapis.com/overview?project=<project_id>
+- cloudkms.googleapis.com (KMS) API: https://console.cloud.google.com/marketplace/product/google/cloudkms.googleapis.com?project=<project_id>
 
 ### SettleMint Blockchain Transformation Platform credentials
 

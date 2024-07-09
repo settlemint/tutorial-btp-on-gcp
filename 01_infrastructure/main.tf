@@ -17,16 +17,15 @@ module "gke" {
 
   node_pools = [
     {
-      name               = "default-node-pool"
-      machine_type       = "e2-standard-4"
-      min_count          = 1
-      max_count          = 50
-      disk_size_gb       = 50
-      disk_type          = "pd-balanced"
-      image_type         = "COS_CONTAINERD"
-      auto_repair        = true
-      auto_upgrade       = true
-      initial_node_count = 1
+      name         = "default-node-pool"
+      machine_type = "e2-standard-4"
+      min_count    = 1
+      max_count    = 50
+      disk_size_gb = 50
+      disk_type    = "pd-balanced"
+      image_type   = "COS_CONTAINERD"
+      auto_repair  = true
+      auto_upgrade = true
     }
   ]
 
@@ -118,4 +117,34 @@ module "external_dns_workload_identity" {
   project_id                      = var.gcp_project_id
   automount_service_account_token = true
   depends_on                      = [kubernetes_namespace.settlemint]
+}
+
+module "vault_unseal_workload_identity" {
+  source                          = "terraform-google-modules/kubernetes-engine/google//modules/workload-identity"
+  use_existing_k8s_sa             = false
+  cluster_name                    = var.gcp_platform_name
+  location                        = var.gcp_region
+  name                            = var.vault_unseal_workload_identity
+  roles                           = ["roles/cloudkms.cryptoKeyEncrypterDecrypter", "roles/cloudkms.viewer"]
+  namespace                       = var.dependencies_namespace
+  project_id                      = var.gcp_project_id
+  automount_service_account_token = true
+  depends_on                      = [kubernetes_namespace.cluster_dependencies_namespace]
+}
+
+resource "random_id" "key_ring_suffix" {
+  byte_length = 4
+}
+
+# Create the KMS Key Ring
+resource "google_kms_key_ring" "vault_key_ring" {
+  name     = "${var.gcp_key_ring_name}-${random_id.key_ring_suffix.hex}"
+  project  = var.gcp_project_id
+  location = var.gcp_region
+}
+
+# Create the KMS Crypto Key
+resource "google_kms_crypto_key" "vault_crypto_key" {
+  name     = var.gcp_crypto_key_name
+  key_ring = google_kms_key_ring.vault_key_ring.id
 }
