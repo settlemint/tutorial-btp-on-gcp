@@ -119,19 +119,6 @@ module "external_dns_workload_identity" {
   depends_on                      = [kubernetes_namespace.settlemint]
 }
 
-module "vault_unseal_workload_identity" {
-  source                          = "terraform-google-modules/kubernetes-engine/google//modules/workload-identity"
-  use_existing_k8s_sa             = false
-  cluster_name                    = var.gcp_platform_name
-  location                        = var.gcp_region
-  name                            = var.vault_unseal_workload_identity
-  roles                           = ["roles/cloudkms.cryptoKeyEncrypterDecrypter", "roles/cloudkms.viewer"]
-  namespace                       = var.dependencies_namespace
-  project_id                      = var.gcp_project_id
-  automount_service_account_token = true
-  depends_on                      = [kubernetes_namespace.cluster_dependencies_namespace]
-}
-
 resource "random_id" "key_ring_suffix" {
   byte_length = 4
 }
