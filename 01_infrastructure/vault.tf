@@ -2,7 +2,7 @@ module "service_accounts" {
   source        = "terraform-google-modules/service-accounts/google"
   version       = "~> 4.0"
   project_id    = var.gcp_project_id
-  prefix        = "vault"
+  prefix        = "vault-${random_id.platform_suffix.hex}"
   names         = ["unseal-sa"]
   project_roles = [
     "${var.gcp_project_id}=>roles/cloudkms.cryptoKeyEncrypterDecrypter",
@@ -37,7 +37,7 @@ resource "helm_release" "vault" {
 
   set {
     name  = "server.extraEnvironmentVars.GOOGLE_REGION"
-    value = "${var.gcp_region}"
+    value = var.gcp_region
   }
 
   set {
@@ -91,7 +91,7 @@ resource "helm_release" "vault" {
       seal "gcpckms" {
         project     = "${var.gcp_project_id}"
         region      = "${var.gcp_region}"
-        key_ring    = "${var.gcp_key_ring_name}-${random_id.key_ring_suffix.hex}"
+        key_ring    = "${var.gcp_key_ring_name}-${random_id.platform_suffix.hex}"
         crypto_key  = "${var.gcp_crypto_key_name}"
       }
     EOT

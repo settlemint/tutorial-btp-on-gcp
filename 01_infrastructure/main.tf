@@ -1,5 +1,9 @@
 data "google_client_config" "default" {}
 
+resource "random_id" "platform_suffix" {
+  byte_length = 4
+}
+
 module "gke" {
   source  = "terraform-google-modules/kubernetes-engine/google"
   version = "~> 31.0"
@@ -96,9 +100,9 @@ resource "kubernetes_namespace" "settlemint" {
 module "cert_manager_workload_identity" {
   source                          = "terraform-google-modules/kubernetes-engine/google//modules/workload-identity"
   use_existing_k8s_sa             = false
-  cluster_name                    = var.gcp_platform_name
+  cluster_name                    = "${var.gcp_platform_name}-${random_id.platform_suffix.hex}"
   location                        = var.gcp_region
-  name                            = var.cert_manager_workload_identity
+  name                            = "${var.cert_manager_workload_identity}-${random_id.platform_suffix.hex}"
   roles                           = ["roles/dns.admin"]
   namespace                       = var.dependencies_namespace
   project_id                      = var.gcp_project_id
@@ -109,9 +113,9 @@ module "cert_manager_workload_identity" {
 module "external_dns_workload_identity" {
   source                          = "terraform-google-modules/kubernetes-engine/google//modules/workload-identity"
   use_existing_k8s_sa             = false
-  cluster_name                    = var.gcp_platform_name
+  cluster_name                    = "${var.gcp_platform_name}-${random_id.platform_suffix.hex}"
   location                        = var.gcp_region
-  name                            = var.external_dns_workload_identity
+  name                            = "${var.external_dns_workload_identity}-${random_id.platform_suffix.hex}"
   roles                           = ["roles/dns.admin"]
   namespace                       = "settlemint"
   project_id                      = var.gcp_project_id
@@ -119,13 +123,9 @@ module "external_dns_workload_identity" {
   depends_on                      = [kubernetes_namespace.settlemint]
 }
 
-resource "random_id" "key_ring_suffix" {
-  byte_length = 4
-}
-
 # Create the KMS Key Ring
 resource "google_kms_key_ring" "vault_key_ring" {
-  name     = "${var.gcp_key_ring_name}-${random_id.key_ring_suffix.hex}"
+  name     = "${var.gcp_key_ring_name}-${random_id.platform_suffix.hex}"
   project  = var.gcp_project_id
   location = var.gcp_region
 }
