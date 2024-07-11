@@ -31,7 +31,7 @@ locals {
     minio_svcacct_secret_key       = random_password.minio_svcacct_secret_key.result
     deployment_namespace           = var.deployment_namespace
     grafana_password               = random_password.grafana_password.result
-    external_dns_workload_identity = var.external_dns_workload_identity
+    external_dns_workload_identity = "${var.external_dns_workload_identity}-${random_id.platform_suffix.hex}"
     gcp_project_id                 = var.gcp_project_id
   })
 }

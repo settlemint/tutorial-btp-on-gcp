@@ -13,7 +13,7 @@ resource "helm_release" "cert_manager" {
 
   set {
     name  = "serviceAccount.name"
-    value = var.cert_manager_workload_identity
+    value = "${var.cert_manager_workload_identity}-${random_id.platform_suffix.hex}"
   }
 
   set {

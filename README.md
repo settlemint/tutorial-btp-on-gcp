@@ -32,6 +32,13 @@ You will need to enable several API for your project.
 - container.googleapis.com: https://console.developers.google.com/apis/api/container.googleapis.com/overview?project=<project_id>
 - cloudkms.googleapis.com (KMS) API: https://console.cloud.google.com/marketplace/product/google/cloudkms.googleapis.com?project=<project_id>
 
+Your GCP IAM user should have permission to manage GKE clusters, CloudDNS zones, KMS keys and IAM permissions. Suggest to run it with `Owner` permission. If you cannot grant your GCP user `Owner` permissions, grant following:
+- Editor
+- Cloud KMS Admin
+- Project IAM Admin
+- Kubernetes Engine Admin
+- Service Account Admin
+
 ### SettleMint Blockchain Transformation Platform credentials
 
 From your Customer Success contact, you will get login credentials for the SettleMint OCI registry hosting the Helm chart and docker images. We will also need the version to be installed.
