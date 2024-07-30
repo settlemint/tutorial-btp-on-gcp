@@ -60,6 +60,22 @@ In Authorised JavaScript origins add the domain name you will use to access BTP 
 
 You will get a Client ID and Client secret at the end of this process, note them down for later.
 
+### SMTP configuration (Optional)
+
+If you want to configure email notifications, you will need to setup SMTP server. You can use any SMTP server, for example [MailGun](https://www.mailgun.com/). You will need to create SMTP credentials for your account. Without this, you will not able to invite users to your Organization. Everything else will work fine.
+
+If you have a working SMTP server, update following values in value.yaml.tmpl:
+
+```yaml
+internal:
+  email:
+    enabled: true
+    from: "support@example.com"
+    server: "smtps://username:password@host:port"
+```
+
+You will need to replace `support@example.com` with your email address and `username:password@host:port` with your SMTP credentials.
+
 ## Terraform setup
 
 Below you will find instruction how to setup BTP platform on GCP with terraform code. It consist 2 steps and manual step, as we need to preconfigure public DNS zone to access BTP platform.
