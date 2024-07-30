@@ -56,7 +56,7 @@ Fill all fields:
 
 Browse to https://console.developers.google.com/apis/credentials and on the top use + CREATE CREDENTIALS, choose `OAuth client ID` and then as type Web application.
 
-In Authorised JavaScript origins add the domain name you will use to access BTP platform, for example example https://btp.settlemint.com. In Authorised redirect URIs use https://btp.settlemint.com/api/auth/callback/google.
+In Authorised JavaScript origins add the domain name you will use to access BTP platform, for example https://btp.settlemint.com. In Authorised redirect URIs use https://btp.settlemint.com/api/auth/callback/google.
 
 You will get a Client ID and Client secret at the end of this process, note them down for later.
 
