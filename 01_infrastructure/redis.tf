@@ -7,7 +7,7 @@ resource "helm_release" "redis" {
   name       = "redis"
   repository = "oci://registry-1.docker.io/bitnamicharts"
   chart      = "redis"
-  version    = "19.6.0"
+  version    = "20.6.2"
   namespace  = var.dependencies_namespace
 
   create_namespace = true
