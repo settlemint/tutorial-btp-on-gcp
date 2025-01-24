@@ -1,6 +1,6 @@
 module "service_accounts" {
   source        = "terraform-google-modules/service-accounts/google"
-  version       = "4.4.4"
+  version       = "4.5.0"
   project_id    = var.gcp_project_id
   prefix        = "vault-${random_id.platform_suffix.hex}"
   names         = ["unseal-sa"]
