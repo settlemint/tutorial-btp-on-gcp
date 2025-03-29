@@ -26,7 +26,7 @@ resource "helm_release" "vault" {
   name             = "vault"
   repository       = "https://helm.releases.hashicorp.com"
   chart            = "vault"
-  version          = "0.29.1"
+  version          = "0.30.0"
   namespace        = var.dependencies_namespace
   create_namespace = true
 
