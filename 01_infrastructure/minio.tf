@@ -22,7 +22,7 @@ resource "helm_release" "minio" {
   name       = "minio"
   repository = "oci://registry-1.docker.io/bitnamicharts"
   chart      = "minio"
-  version    = "16.0.5"
+  version    = "16.0.7"
   namespace  = var.dependencies_namespace
 
   create_namespace = true
