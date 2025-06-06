@@ -1,6 +1,6 @@
 resource "helm_release" "nginx_ingress" {
   name    = "ingress-nginx"
-  version = "4.12.2"
+  version = "4.12.3"
 
   repository = "https://kubernetes.github.io/ingress-nginx"
   chart      = "ingress-nginx"
