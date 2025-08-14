@@ -6,7 +6,7 @@ resource "random_id" "platform_suffix" {
 
 module "gke" {
   source  = "terraform-google-modules/kubernetes-engine/google"
-  version = "36.3.0"
+  version = "38.0.0"
 
   project_id        = var.gcp_project_id
   name              = var.gcp_platform_name
