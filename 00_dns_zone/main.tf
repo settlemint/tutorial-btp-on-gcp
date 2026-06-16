@@ -59,7 +59,7 @@ module "gcp_dns_zone" {
   # This module provides best practices for DNS zone configuration
   # and integrates seamlessly with other Google Cloud services
   source  = "terraform-google-modules/cloud-dns/google"
-  version = "6.2.1"
+  version = "7.1.0"
 
   # Target GCP project where the DNS zone will be created
   # Must have Cloud DNS API enabled and appropriate IAM permissions
