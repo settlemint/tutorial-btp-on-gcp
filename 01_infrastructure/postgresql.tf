@@ -83,7 +83,7 @@ resource "helm_release" "postgresql" {
   # Provides regularly updated, security-patched PostgreSQL deployments
   repository = "oci://registry-1.docker.io/bitnamicharts"
   chart      = "postgresql"
-  version    = "16.7.26"  # Stable version with PostgreSQL 16.x
+  version    = "16.7.27"  # Stable version with PostgreSQL 16.x
   
   # Deploy in cluster dependencies namespace
   # Co-locates with other infrastructure services
