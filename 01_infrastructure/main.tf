@@ -118,7 +118,7 @@ module "gke" {
   # Provides best practices configuration and comprehensive feature support
   # Maintained by Google Cloud team with regular updates and security patches
   source  = "terraform-google-modules/kubernetes-engine/google"
-  version = "36.3.0"
+  version = "44.2.0"
 
   # Google Cloud Project Configuration
   # Target project where the GKE cluster will be created
